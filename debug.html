@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Hamburger Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: yellow;
+            padding: 10px;
+            border: 2px solid red;
+            z-index: 99999;
+            font-size: 12px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+
+        .hamburger-btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: 2px solid yellow;
+            cursor: pointer;
+            padding: 0;
+            z-index: 10002;
+        }
+
+        .hamburger-btn span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .logo {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 10001;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            border: 3px solid red;
+        }
+
+        .sidebar.active {
+            left: 0;
+            border-color: green;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .close-sidebar {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .nav-links {
+            padding: 1rem 0;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: #0f172a;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        main {
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debug">
+        Status: Ready<br>
+        Clicks: 0
+    </div>
+
+    <header>
+        <button class="hamburger-btn" onclick="toggleMenu()" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        
+        <div class="logo">Plastiwood</div>
+        
+        <div>User Menu</div>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button class="close-sidebar" onclick="toggleMenu()">×</button>
+        </div>
+        <div class="nav-links">
+            <button class="nav-btn">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn">
+                <span class="nav-icon">📦</span>
+                <span>Inventory</span>
+            </button>
+            <button class="nav-btn">
+                <span class="nav-icon">🛒</span>
+                <span>Purchases</span>
+            </button>
+            <button class="nav-btn">
+                <span class="nav-icon">💰</span>
+                <span>Sales</span>
+            </button>
+            <button class="nav-btn">
+                <span class="nav-icon">🧾</span>
+                <span>Billing</span>
+            </button>
+            <button class="nav-btn">
+                <span class="nav-icon">📈</span>
+                <span>Reports</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+
+    <main>
+        <h1>Debug Hamburger Menu</h1>
+        <p>Click the hamburger menu (☰) in the top-left to test.</p>
+        <p>Watch the yellow debug box in top-right for status.</p>
+        <p>The sidebar has a RED border when closed, GREEN when open.</p>
+        <p>The hamburger button has a YELLOW border.</p>
+    </main>
+
+    <script>
+        let clickCount = 0;
+        
+        function updateDebug(message) {
+            const debug = document.getElementById('debug');
+            debug.innerHTML = `Status: ${message}<br>Clicks: ${clickCount}`;
+        }
+
+        function toggleMenu() {
+            clickCount++;
+            console.log('=== toggleMenu called ===');
+            console.log('Click count:', clickCount);
+            
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            console.log('Sidebar element:', sidebar);
+            console.log('Overlay element:', overlay);
+            
+            if (!sidebar) {
+                updateDebug('ERROR: Sidebar not found!');
+                console.error('Sidebar element not found!');
+                return;
+            }
+            
+            if (!overlay) {
+                updateDebug('ERROR: Overlay not found!');
+                console.error('Overlay element not found!');
+                return;
+            }
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            const isActive = sidebar.classList.contains('active');
+            console.log('Sidebar active:', isActive);
+            console.log('Sidebar classes:', sidebar.className);
+            console.log('Overlay classes:', overlay.className);
+            
+            updateDebug(isActive ? 'OPEN' : 'CLOSED');
+        }
+        
+        // Test on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded');
+            updateDebug('Page loaded - Ready');
+            
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const hamburger = document.getElementById('hamburger');
+            
+            console.log('Elements found:', {
+                sidebar: !!sidebar,
+                overlay: !!overlay,
+                hamburger: !!hamburger
+            });
+        });
+    </script>
+</body>
+</html>

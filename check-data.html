@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Verification - Plastiwood</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; }
+        h2 { color: #475569; margin-top: 2rem; }
+        .data-section {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+        }
+        .count {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f1f5f9;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+        .btn:hover {
+            background: #1e40af;
+        }
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .status-paid { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fee2e2; color: #991b1b; }
+        .status-partial { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Plastiwood Data Verification</h1>
+        <p>This page shows all your stored data from localStorage</p>
+        
+        <button class="btn" onclick="location.href='index.html'">← Back to App</button>
+        <button class="btn" onclick="exportData()">📥 Export All Data</button>
+        
+        <div class="data-section">
+            <h2>📦 Inventory</h2>
+            <p class="count" id="inventory-count">0</p>
+            <div id="inventory-data"></div>
+        </div>
+        
+        <div class="data-section">
+            <h2>💰 Sales / Bills</h2>
+            <p class="count" id="bills-count">0</p>
+            <div id="bills-data"></div>
+        </div>
+        
+        <div class="data-section">
+            <h2>🛒 Purchases</h2>
+            <p class="count" id="purchases-count">0</p>
+            <div id="purchases-data"></div>
+        </div>
+        
+        <div class="data-section">
+            <h2>👥 Customers</h2>
+            <p class="count" id="customers-count">0</p>
+            <div id="customers-data"></div>
+        </div>
+        
+        <div class="data-section">
+            <h2>🏢 Suppliers</h2>
+            <p class="count" id="suppliers-count">0</p>
+            <div id="suppliers-data"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load and display all data
+        function loadAllData() {
+            // Inventory
+            const inventory = JSON.parse(localStorage.getItem('plastiwood_inventory') || '[]');
+            document.getElementById('inventory-count').textContent = inventory.length + ' items';
+            if (inventory.length > 0) {
+                let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Size</th><th>Unit</th><th>Stock</th><th>Price</th><th>GST %</th></tr></thead><tbody>';
+                inventory.forEach(item => {
+                    html += `<tr>
+                        <td>${item.id}</td>
+                        <td><strong>${item.name}</strong></td>
+                        <td>${item.size}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.quantity}</td>
+                        <td>₹${item.price.toFixed(2)}</td>
+                        <td>${item.gst}%</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('inventory-data').innerHTML = html;
+            }
+            
+            // Bills
+            const bills = JSON.parse(localStorage.getItem('plastiwood_bills') || '[]');
+            document.getElementById('bills-count').textContent = bills.length + ' bills';
+            if (bills.length > 0) {
+                let html = '<table><thead><tr><th>Bill #</th><th>Date</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th></tr></thead><tbody>';
+                bills.forEach(bill => {
+                    const date = new Date(bill.createdAt).toLocaleDateString();
+                    const statusClass = bill.paymentStatus === 'paid' ? 'status-paid' : bill.paymentStatus === 'pending' ? 'status-pending' : 'status-partial';
+                    html += `<tr>
+                        <td><strong>#${bill.id}</strong></td>
+                        <td>${date}</td>
+                        <td>${bill.customer.name}</td>
+                        <td>${bill.items.length} items</td>
+                        <td><strong>₹${bill.total.toFixed(2)}</strong></td>
+                        <td><span class="status ${statusClass}">${bill.paymentStatus.toUpperCase()}</span></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('bills-data').innerHTML = html;
+            }
+            
+            // Purchases
+            const purchases = JSON.parse(localStorage.getItem('plastiwood_purchases') || '[]');
+            document.getElementById('purchases-count').textContent = purchases.length + ' orders';
+            if (purchases.length > 0) {
+                let html = '<table><thead><tr><th>Purchase #</th><th>Date</th><th>Supplier</th><th>Invoice</th><th>Items</th><th>Total</th><th>Payment</th></tr></thead><tbody>';
+                purchases.forEach(purchase => {
+                    const date = new Date(purchase.date).toLocaleDateString();
+                    const statusClass = purchase.paymentStatus === 'paid' ? 'status-paid' : purchase.paymentStatus === 'pending' ? 'status-pending' : 'status-partial';
+                    html += `<tr>
+                        <td><strong>#${purchase.id}</strong></td>
+                        <td>${date}</td>
+                        <td>${purchase.supplier.name}</td>
+                        <td>${purchase.invoiceNumber}</td>
+                        <td>${purchase.items.length} items</td>
+                        <td><strong>₹${purchase.total.toFixed(2)}</strong></td>
+                        <td><span class="status ${statusClass}">${purchase.paymentStatus.toUpperCase()}</span></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('purchases-data').innerHTML = html;
+            }
+            
+            // Customers
+            const customers = JSON.parse(localStorage.getItem('plastiwood_customers') || '[]');
+            document.getElementById('customers-count').textContent = customers.length + ' customers';
+            if (customers.length > 0) {
+                let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>GST Number</th><th>State</th></tr></thead><tbody>';
+                customers.forEach(customer => {
+                    html += `<tr>
+                        <td>${customer.id}</td>
+                        <td><strong>${customer.name}</strong></td>
+                        <td>${customer.phone || '-'}</td>
+                        <td>${customer.gst || '-'}</td>
+                        <td>${customer.state === 'same' ? 'Same State' : 'Other State'}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('customers-data').innerHTML = html;
+            }
+            
+            // Suppliers
+            const suppliers = JSON.parse(localStorage.getItem('plastiwood_suppliers') || '[]');
+            document.getElementById('suppliers-count').textContent = suppliers.length + ' suppliers';
+            if (suppliers.length > 0) {
+                let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>GST Number</th></tr></thead><tbody>';
+                suppliers.forEach(supplier => {
+                    html += `<tr>
+                        <td>${supplier.id}</td>
+                        <td><strong>${supplier.name}</strong></td>
+                        <td>${supplier.phone || '-'}</td>
+                        <td>${supplier.gst || '-'}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('suppliers-data').innerHTML = html;
+            }
+        }
+        
+        function exportData() {
+            const data = {
+                inventory: JSON.parse(localStorage.getItem('plastiwood_inventory') || '[]'),
+                bills: JSON.parse(localStorage.getItem('plastiwood_bills') || '[]'),
+                purchases: JSON.parse(localStorage.getItem('plastiwood_purchases') || '[]'),
+                customers: JSON.parse(localStorage.getItem('plastiwood_customers') || '[]'),
+                suppliers: JSON.parse(localStorage.getItem('plastiwood_suppliers') || '[]'),
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `plastiwood-data-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            alert('Data exported successfully!');
+        }
+        
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
+</body>
+</html>
